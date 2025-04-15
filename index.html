@@ -1,52 +1,70 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<!-- Đặt trong <head> hoặc ngay trước </body> -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/turn.js@4.1.0/turn.min.js"></script>
-
   <meta charset="UTF-8">
-  <title>PDF Flipbook Chuẩn</title>
+  <title>Flipbook PDF - 1 Trang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       background: #eee;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 0;
       font-family: Arial, sans-serif;
+      overflow-x: hidden;
     }
 
     #flipbook {
-      width: 800px;
-      height: 600px;
-      margin-top: 20px;
+      margin: 0 auto;
+      max-height: 90vh;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     .page {
-      width: 100%;
-      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     canvas {
-      width: 100% !important;
-      height: 100% !important;
+      height: 90vh !important;
+      width: auto !important;
     }
 
     .nav {
-      margin: 15px;
+      position: fixed;
+      bottom: 5%;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      z-index: 1000;
     }
 
     .nav button {
-      padding: 8px 16px;
-      margin: 0 10px;
+      padding: 10px 20px;
       font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #333;
+      color: white;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .nav button:hover {
+      background-color: #555;
     }
   </style>
 </head>
 <body>
 
-  <h2>Flipbook PDF</h2>
+  <h2 style="text-align:center; margin: 20px 0;">Flipbook PDF (1 trang)</h2>
   <div id="flipbook"></div>
 
   <div class="nav">
@@ -54,17 +72,13 @@
     <button onclick="$('#flipbook').turn('next')">Trang sau ➡</button>
   </div>
 
-  <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-  <!-- Turn.js -->
-  <script src="https://cdn.jsdelivr.net/npm/turn.js@4.1.0/turn.min.js"></script>
-
-  <!-- PDF.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <!-- Script nội bộ -->
+  <script src="js/jquery-3.6.0.min.js"></script>
+  <script src="js/turn.min.js"></script>
+  <script src="js/pdf.min.js"></script>
 
   <script>
-    const pdfPath = 'IMG_8670.pdf'; // Đổi thành file PDF thật
+    const pdfPath = 'IMG_8670.pdf'; // Đổi tên file PDF tại đây
 
     const flipbook = document.getElementById('flipbook');
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
@@ -75,14 +89,19 @@
 
       const loadPage = (pageNum) => {
         return pdf.getPage(pageNum).then(page => {
+          const viewport = page.getViewport({ scale: 1 });
+          const scale = (window.innerHeight * 0.9) / viewport.height;
+          const scaledViewport = page.getViewport({ scale });
+
           const canvas = document.createElement('canvas');
           canvas.className = 'page';
+          canvas.width = scaledViewport.width;
+          canvas.height = scaledViewport.height;
 
-          const viewport = page.getViewport({ scale: 1.5 });
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-
-          return page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise.then(() => {
+          return page.render({
+            canvasContext: canvas.getContext('2d'),
+            viewport: scaledViewport
+          }).promise.then(() => {
             const wrapper = document.createElement('div');
             wrapper.className = 'page';
             wrapper.appendChild(canvas);
@@ -91,7 +110,6 @@
         });
       };
 
-      // Load toàn bộ trang
       const pagePromises = [];
       for (let i = 1; i <= totalPages; i++) {
         pagePromises.push(loadPage(i));
@@ -101,10 +119,22 @@
         pageElements.forEach(el => flipbook.appendChild(el));
 
         $('#flipbook').turn({
-          width: 800,
-          height: 600,
-          autoCenter: true
-        });
+			  width: pageElements[0].offsetWidth,
+			  height: pageElements[0].offsetHeight,
+			  autoCenter: true,
+			  display: 'single',
+			  duration: 1200 // 👉 thời gian lật (ms), có thể chỉnh thành 1500 nếu muốn chậm hơn
+				});
+				// Cải thiện lật trang trên thiết bị cảm ứng:
+			  when: {
+				turning: function(event, page, view) {
+				  // Tùy chỉnh, nếu cần thêm logic xử lý trong quá trình lật
+				}
+			  },
+			  // Bật tính năng cảm ứng
+			  touch: true,
+			  // Enable swipe (vuốt) để lật trang
+			  swipe: true
       });
     }).catch(err => {
       console.error('Không thể tải PDF:', err);
