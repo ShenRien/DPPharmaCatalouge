@@ -78,10 +78,10 @@
   <script src="js/pdf.min.js"></script>
 
   <script>
-    const pdfPath = 'IMG_8670.pdf'; // Đổi tên file PDF tại đây
+    const pdfPath = 'IMG_8670_compressed.pdf'; // Đổi tên file PDF tại đây
 
     const flipbook = document.getElementById('flipbook');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdf.worker.min.js';
 
     pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
       const totalPages = pdf.numPages;
