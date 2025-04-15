@@ -9,17 +9,25 @@
       background: #eee;
       font-family: Arial, sans-serif;
       margin: 0;
+      padding: 0;
     }
 
     #flipbook {
-      margin: 20px auto;
-      max-width: 90vw;
+      width: 90vw;
       height: 90vh;
+      margin: 20px auto;
+    }
+
+    .page {
+      width: 100%;
+      height: 100%;
+      background: white;
     }
 
     canvas {
-      width: auto !important;
-      height: 90vh !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
     }
 
     .nav {
@@ -30,6 +38,7 @@
       display: flex;
       justify-content: center;
       gap: 20px;
+      z-index: 999;
     }
 
     .nav button {
@@ -60,9 +69,10 @@
 
   <script>
     const pdfPath = 'IMG_8670_compressed.pdf';
-    const flipbook = document.getElementById('flipbook');
 
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
+
+    const flipbook = $('#flipbook');
 
     pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
       const totalPages = pdf.numPages;
@@ -71,7 +81,7 @@
       const loadPage = (pageNum) => {
         return pdf.getPage(pageNum).then(page => {
           const viewport = page.getViewport({ scale: 1 });
-          const scale = (window.innerHeight * 0.9) / viewport.height;
+          const scale = flipbook.height() / viewport.height;
           const scaledViewport = page.getViewport({ scale });
 
           const canvas = document.createElement('canvas');
@@ -82,42 +92,42 @@
             canvasContext: canvas.getContext('2d'),
             viewport: scaledViewport
           }).promise.then(() => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'page';
-            wrapper.appendChild(canvas);
-            pageElements[pageNum - 1] = wrapper;
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'page';
+            pageDiv.appendChild(canvas);
+            flipbook.append(pageDiv);
           });
         });
       };
 
-      const pagePromises = [];
+      const promises = [];
       for (let i = 1; i <= totalPages; i++) {
-        pagePromises.push(loadPage(i));
+        promises.push(loadPage(i));
       }
 
-      Promise.all(pagePromises).then(() => {
-        pageElements.forEach(el => flipbook.appendChild(el));
-
-        // Khởi tạo turn sau khi DOM đã có nội dung
-        $('#flipbook').turn({
-          width: pageElements[0].offsetWidth,
-          height: pageElements[0].offsetHeight,
+      Promise.all(promises).then(() => {
+        // Khởi tạo sách lật
+        flipbook.turn({
+          width: flipbook.width(),
+          height: flipbook.height(),
           autoCenter: true,
-          display: 'single'
+          display: 'single', // 'double' nếu muốn 2 trang đối xứng
+          acceleration: true,
+          gradients: true
         });
 
-        // Bắt sự kiện khi nhấn nút
-        document.getElementById('prevPage').addEventListener('click', () => {
-          $('#flipbook').turn('previous');
+        // Nút lật trang
+        $('#prevPage').on('click', () => {
+          flipbook.turn('previous');
         });
 
-        document.getElementById('nextPage').addEventListener('click', () => {
-          $('#flipbook').turn('next');
+        $('#nextPage').on('click', () => {
+          flipbook.turn('next');
         });
       });
     }).catch(err => {
       console.error('Lỗi tải PDF:', err);
-      alert('Không thể tải PDF. Kiểm tra đường dẫn hoặc file.');
+      alert('Không thể tải PDF.');
     });
   </script>
 </body>
