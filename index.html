@@ -3,17 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>Flipbook PDF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #ccc;
+      font-family: Arial, sans-serif;
+    }
+
     #flipbook {
       width: 800px;
       height: 600px;
-      margin: 50px auto;
+      margin: 40px auto;
     }
 
     .page {
       background: white;
       width: 100%;
       height: 100%;
+      overflow: hidden;
     }
 
     canvas {
@@ -21,16 +30,33 @@
       height: 100%;
       display: block;
     }
+
+    .nav {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .nav button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 0 10px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
   <div id="flipbook"></div>
 
-  <!-- jQuery (chỉ 1 bản!) -->
+  <div class="nav">
+    <button id="prevPage">⬅ Trang trước</button>
+    <button id="nextPage">Trang sau ➡</button>
+  </div>
+
+  <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-  <!-- turn.js -->
+  <!-- Turn.js -->
   <script src="https://cdn.jsdelivr.net/gh/blasten/turn.js@4/turn.min.js"></script>
 
   <!-- PDF.js -->
@@ -38,46 +64,51 @@
 
   <script>
     $(document).ready(function () {
-      const pdfPath = 'IMG_8670_compressed.pdf'; // Đường dẫn file PDF
-      const flipbook = $('#flipbook');
+      const pdfPath = 'IMG_8670_compressed.pdf'; // đổi tên đúng file PDF tại đây
+      const $flipbook = $('#flipbook');
 
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
 
       pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
-        const pageCount = pdf.numPages;
-        const promises = [];
+        const numPages = pdf.numPages;
+        const loadPages = [];
 
-        for (let i = 1; i <= pageCount; i++) {
-          promises.push(
+        for (let i = 1; i <= numPages; i++) {
+          loadPages.push(
             pdf.getPage(i).then(page => {
-              const viewport = page.getViewport({ scale: 1 });
+              const viewport = page.getViewport({ scale: 1.5 });
+
               const canvas = document.createElement('canvas');
+              const context = canvas.getContext('2d');
               canvas.width = viewport.width;
               canvas.height = viewport.height;
 
-              return page.render({
-                canvasContext: canvas.getContext('2d'),
-                viewport: viewport
-              }).promise.then(() => {
+              return page.render({ canvasContext: context, viewport }).promise.then(() => {
                 const pageDiv = document.createElement('div');
                 pageDiv.className = 'page';
                 pageDiv.appendChild(canvas);
-                flipbook.append(pageDiv);
+                $flipbook.append(pageDiv);
               });
             })
           );
         }
 
-        Promise.all(promises).then(() => {
-          // Gọi turn sau khi đã thêm xong các trang
-          flipbook.turn({
+        Promise.all(loadPages).then(() => {
+          // Gọi turn.js sau khi đã thêm trang xong
+          $flipbook.turn({
             width: 800,
             height: 600,
             autoCenter: true,
-            display: 'single'
+            display: 'single',
+            elevation: 50,
+            duration: 1000
           });
         });
       });
+
+      // Nút điều hướng
+      $('#prevPage').click(() => $flipbook.turn('previous'));
+      $('#nextPage').click(() => $flipbook.turn('next'));
     });
   </script>
 </body>
