@@ -2,12 +2,12 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Flipbook Test</title>
+  <title>Flipbook PDF</title>
   <style>
     #flipbook {
       width: 800px;
       height: 600px;
-      margin: auto;
+      margin: 50px auto;
     }
 
     .page {
@@ -23,55 +23,59 @@
     }
   </style>
 </head>
-  <div>whats up</div>
 <body>
 
   <div id="flipbook"></div>
 
-  <!-- jQuery trước -->
+  <!-- jQuery (chỉ 1 bản!) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-  <!-- turn.js sau jQuery -->
+  <!-- turn.js -->
   <script src="https://cdn.jsdelivr.net/gh/blasten/turn.js@4/turn.min.js"></script>
 
   <!-- PDF.js -->
   <script src="https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.min.js"></script>
 
   <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
+    $(document).ready(function () {
+      const pdfPath = 'IMG_8670_compressed.pdf'; // Đường dẫn file PDF
+      const flipbook = $('#flipbook');
 
-    const flipbook = $('#flipbook');
-    const pdfPath = 'IMG_8670_compressed.pdf';
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
 
-    pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
-      const loadPage = (pageNum) => {
-        return pdf.getPage(pageNum).then(page => {
-          const viewport = page.getViewport({ scale: 1 });
-          const canvas = document.createElement('canvas');
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
+      pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
+        const pageCount = pdf.numPages;
+        const promises = [];
 
-          return page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise.then(() => {
-            const pageDiv = document.createElement('div');
-            pageDiv.className = 'page';
-            pageDiv.appendChild(canvas);
-            flipbook.append(pageDiv);
+        for (let i = 1; i <= pageCount; i++) {
+          promises.push(
+            pdf.getPage(i).then(page => {
+              const viewport = page.getViewport({ scale: 1 });
+              const canvas = document.createElement('canvas');
+              canvas.width = viewport.width;
+              canvas.height = viewport.height;
+
+              return page.render({
+                canvasContext: canvas.getContext('2d'),
+                viewport: viewport
+              }).promise.then(() => {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'page';
+                pageDiv.appendChild(canvas);
+                flipbook.append(pageDiv);
+              });
+            })
+          );
+        }
+
+        Promise.all(promises).then(() => {
+          // Gọi turn sau khi đã thêm xong các trang
+          flipbook.turn({
+            width: 800,
+            height: 600,
+            autoCenter: true,
+            display: 'single'
           });
-        });
-      };
-
-      const promises = [];
-      for (let i = 1; i <= pdf.numPages; i++) promises.push(loadPage(i));
-
-      Promise.all(promises).then(() => {
-        console.log('flipbook:', flipbook);
-        console.log('typeof flipbook.turn:', typeof flipbook.turn);
-
-        flipbook.turn({
-          width: 800,
-          height: 600,
-          autoCenter: true,
-          display: 'single'
         });
       });
     });
