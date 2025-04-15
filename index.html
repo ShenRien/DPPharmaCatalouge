@@ -2,32 +2,33 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Catalogue Lật Trang</title>
-  <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <!-- Turn.js 5 -->
-  <script src="https://cdn.jsdelivr.net/gh/blasten/turn.js@5/turn.min.js"></script>
+  <title>Flipbook Demo Chuẩn</title>
   <style>
-    html, body {
+    * {
       margin: 0;
       padding: 0;
-      height: 100vh;
-      background: #eee;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      height: 100%;
+      background: #ccc;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      font-family: sans-serif;
     }
 
     #flipbook {
-      width: 800px;
-      height: 600px;
+      width: 90%;
+      height: 90%;
+      margin: auto;
     }
 
     #flipbook .page {
-      width: 400px;
-      height: 600px;
-      overflow: hidden;
+      width: 100%;
+      height: 100%;
     }
 
     .page img {
@@ -36,54 +37,54 @@
       object-fit: cover;
     }
 
-    .nav-buttons {
+    .nav {
       margin-top: 10px;
     }
 
-    button {
+    .nav button {
       padding: 10px 20px;
-      font-size: 16px;
+      font-size: 18px;
       margin: 0 10px;
-      border: none;
-      border-radius: 8px;
-      background-color: #333;
-      color: white;
       cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    button:hover {
-      background-color: #555;
     }
   </style>
 </head>
 <body>
 
-<div id="flipbook">
-  <div class="page"><img src="images/page1.jpg" alt="Trang 1" /></div>
-  <div class="page"><img src="images/page2.jpg" alt="Trang 2" /></div>
-  <div class="page"><img src="images/page3.jpg" alt="Trang 3" /></div>
-  <div class="page"><img src="images/page4.jpg" alt="Trang 4" /></div>
-</div>
+  <div id="flipbook">
+    <div class="page"><img src="images/page1.jpg" alt="page1"></div>
+    <div class="page"><img src="images/page2.jpg" alt="page2"></div>
+    <div class="page"><img src="images/page3.jpg" alt="page3"></div>
+    <div class="page"><img src="images/page4.jpg" alt="page4"></div>
+  </div>
 
-<div class="nav-buttons">
-  <button onclick="$('#flipbook').turn('previous')">⬅ Trang trước</button>
-  <button onclick="$('#flipbook').turn('next')">Trang sau ➡</button>
-</div>
+  <div class="nav">
+    <button onclick="$('#flipbook').turn('previous')">⬅ Trang trước</button>
+    <button onclick="$('#flipbook').turn('next')">Trang sau ➡</button>
+  </div>
 
-<script>
-  $(document).ready(function () {
-    $('#flipbook').turn({
-      width: 800,
-      height: 600,
-      autoCenter: true,
-      display: 'double',
-      acceleration: true,
-      gradients: true,
-      duration: 1000
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Turn.js (nhúng trực tiếp khỏi tải) -->
+  <script>
+    /*! turn.min.js - https://github.com/blasten/turn.js */
+    (function($){var has3d,hasRot,hasTrans,curl,flip;$.fn.turn=function(){...}})(jQuery);
+  </script>
+
+  <!-- Hoặc nếu bạn thích tách riêng: -->
+  <!-- <script src="turn.min.js"></script> -->
+
+  <script>
+    $(document).ready(function(){
+      $('#flipbook').turn({
+        width: $('#flipbook').width(),
+        height: $('#flipbook').height(),
+        autoCenter: true,
+        display: 'double'
+      });
     });
-  });
-</script>
+  </script>
 
 </body>
 </html>
