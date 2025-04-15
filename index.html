@@ -82,10 +82,10 @@
 
     const flipbook = document.getElementById('flipbook');
    <!-- Tải thư viện PDF.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script src="https://github.com/ShenRien/DPPharmaCatalouge/blob/js/pdf.min.js"></script>
 <script>
   // Cấu hình worker chuẩn
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://github.com/ShenRien/DPPharmaCatalouge/blob/js/pdf.worker.min.js";
 </script>
     pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
       const totalPages = pdf.numPages;
