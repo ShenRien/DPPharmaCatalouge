@@ -72,20 +72,18 @@
     <button onclick="$('#flipbook').turn('next')">Trang sau ➡</button>
   </div>
 
-  <!-- Script nội bộ -->
-  <script src="https://github.com/ShenRien/DPPharmaCatalouge/blob/js/jquery-3.6.0.min.js"></script>
-  <script src="https://github.com/ShenRien/DPPharmaCatalouge/blob/js/turn.min.js"></script>
-  <script src="https://github.com/ShenRien/DPPharmaCatalouge/blob/js/pdf.min.js"></script>
-<script  src="https://github.com/ShenRien/DPPharmaCatalouge/blob/js/pdf.min.js"></script>
+  <!-- Tải thư viện từ CDN đúng chuẩn -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+
   <script>
-    const pdfPath = 'IMG_8670_compressed.pdf'; // Đổi tên file PDF tại đây
+    // Cấu hình worker của pdfjsLib
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
 
+    const pdfPath = 'IMG_8670_compressed.pdf'; // Đường dẫn tới file PDF
     const flipbook = document.getElementById('flipbook');
-   <!-- Tải thư viện PDF.js -->
 
-  // Cấu hình worker chuẩn
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://github.com/ShenRien/DPPharmaCatalouge/blob/js/pdf.worker.min.js";
-</script>
     pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
       const totalPages = pdf.numPages;
       const pageElements = [];
@@ -126,12 +124,7 @@
           height: pageElements[0].offsetHeight,
           autoCenter: true,
           display: 'single',
-          duration: 1200, // 👉 thời gian lật (ms), có thể chỉnh thành 1500 nếu muốn chậm hơn
-          when: {
-            turning: function(event, page, view) {
-              // Thêm logic xử lý trong quá trình lật
-            }
-          },
+          duration: 1200,
           touch: true,
           swipe: true
         });
