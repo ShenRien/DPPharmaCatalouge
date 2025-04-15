@@ -1,126 +1,108 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Flipbook PDF</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #f5f5f5;
-      font-family: Arial, sans-serif;
-    }
-
-    #flipbook {
-      width: 800px;
-      height: 600px;
-      margin: 50px auto;
-      background: white;
-    }
-
-    .page {
-      background: white;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    .nav {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .nav button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin: 0 10px;
-      cursor: pointer;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-
-    .nav button:hover {
-      background-color: #0056b3;
-    }
-  </style>
-</head>
-<body>
-
-  <div id="flipbook"></div>
-
-  <div class="nav">
-    <button id="prevPage">⬅ Trang trước</button>
-    <button id="nextPage">Trang sau ➡</button>
-  </div>
-
-  <!-- Thêm các tệp jQuery và Turn.js từ local -->
-  <script src="js/jquery-3.6.0.min.js"></script>
-  <script src="js/turn.min.js"></script>
-
-  <!-- PDF.js -->
-  <script src="https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.min.js"></script>
-
-  <script>
-    $(document).ready(function () {
-      const pdfPath = 'IMG_8670_compressed.pdf'; // Đổi tên đúng file PDF tại đây
-      const $flipbook = $('#flipbook');
-
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
-
-      pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
-        const numPages = pdf.numPages;
-        const loadPages = [];
-
-        for (let i = 1; i <= numPages; i++) {
-          loadPages.push(
-            pdf.getPage(i).then(page => {
-              const viewport = page.getViewport({ scale: 1.5 });
-
-              const canvas = document.createElement('canvas');
-              const context = canvas.getContext('2d');
-              canvas.width = viewport.width;
-              canvas.height = viewport.height;
-
-              return page.render({ canvasContext: context, viewport }).promise.then(() => {
-                const pageDiv = document.createElement('div');
-                pageDiv.className = 'page';
-                pageDiv.appendChild(canvas);
-                $flipbook.append(pageDiv);
-              });
-            })
-          );
+    <style>
+        #pdf-viewer {
+            position: relative;
+            margin: 20px auto;
+            width: 80%;
+            max-width: 800px;
         }
 
-        Promise.all(loadPages).then(() => {
-          // Gọi turn.js sau khi đã thêm trang xong
-          $flipbook.turn({
-            width: 800,
-            height: 600,
-            autoCenter: true,
-            display: 'single',
-            elevation: 50,
-            duration: 1000
-          });
+        #canvas-container {
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-          // Sử dụng nút điều hướng
-          $('#prevPage').click(() => $flipbook.turn('previous'));
-          $('#nextPage').click(() => $flipbook.turn('next'));
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 15px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .nav-button:hover {
+            background: #0056b3;
+        }
+
+        #prev-page {
+            left: -80px;
+        }
+
+        #next-page {
+            right: -80px;
+        }
+    </style>
+</head>
+<body>
+    <div id="pdf-viewer">
+        <button class="nav-button" id="prev-page">←</button>
+        <div id="canvas-container"></div>
+        <button class="nav-button" id="next-page">→</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script>
+        let currentPage = 1;
+        let pdfDoc = null;
+
+        // Khởi tạo PDF
+        pdfjsLib.getDocument('your-catalogue.pdf').promise.then(pdf => {
+            pdfDoc = pdf;
+            renderPage(currentPage);
         });
-      }).catch(err => {
-        console.error('Không thể tải PDF:', err);
-        alert('Lỗi tải PDF. Kiểm tra lại file PDF hoặc đường dẫn.');
-      });
-    });
-  </script>
+
+        // Render trang
+        function renderPage(pageNum) {
+            pdfDoc.getPage(pageNum).then(page => {
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                // Xóa canvas cũ
+                const container = document.getElementById('canvas-container');
+                container.innerHTML = '';
+                
+                // Render trang mới
+                page.render({
+                    canvasContext: ctx,
+                    viewport
+                }).promise.then(() => {
+                    container.appendChild(canvas);
+                    updateButtonStates();
+                });
+            });
+        }
+
+        // Xử lý nút điều hướng
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage(currentPage);
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', () => {
+            if (currentPage < pdfDoc.numPages) {
+                currentPage++;
+                renderPage(currentPage);
+            }
+        });
+
+        // Cập nhật trạng thái nút
+        function updateButtonStates() {
+            document.getElementById('prev-page').disabled = (currentPage === 1);
+            document.getElementById('next-page').disabled = (currentPage === pdfDoc.numPages);
+        }
+    </script>
 </body>
 </html>
