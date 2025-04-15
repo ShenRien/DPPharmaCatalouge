@@ -8,14 +8,15 @@
     body {
       margin: 0;
       padding: 0;
-      background: #ccc;
+      background: #f5f5f5;
       font-family: Arial, sans-serif;
     }
 
     #flipbook {
       width: 800px;
       height: 600px;
-      margin: 40px auto;
+      margin: 50px auto;
+      background: white;
     }
 
     .page {
@@ -41,30 +42,37 @@
       font-size: 16px;
       margin: 0 10px;
       cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .nav button:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
 
-  <div id="flipbook">Shenrien Store</div>
+  <div id="flipbook"></div>
 
   <div class="nav">
     <button id="prevPage">⬅ Trang trước</button>
     <button id="nextPage">Trang sau ➡</button>
   </div>
 
-  <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-  <!-- Turn.js -->
-  <script src="https://cdn.jsdelivr.net/gh/blasten/turn.js@4/turn.min.js"></script>
+  <!-- Thêm các tệp jQuery và Turn.js từ local -->
+  <script src="js/jquery-3.6.0.min.js"></script>
+  <script src="js/turn.min.js"></script>
 
   <!-- PDF.js -->
   <script src="https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.min.js"></script>
 
   <script>
     $(document).ready(function () {
-      const pdfPath = 'IMG_8670_compressed.pdf'; // đổi tên đúng file PDF tại đây
+      const pdfPath = 'IMG_8670_compressed.pdf'; // Đổi tên đúng file PDF tại đây
       const $flipbook = $('#flipbook');
 
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
@@ -103,12 +111,15 @@
             elevation: 50,
             duration: 1000
           });
-        });
-      });
 
-      // Nút điều hướng
-      $('#prevPage').click(() => $flipbook.turn('previous'));
-      $('#nextPage').click(() => $flipbook.turn('next'));
+          // Sử dụng nút điều hướng
+          $('#prevPage').click(() => $flipbook.turn('previous'));
+          $('#nextPage').click(() => $flipbook.turn('next'));
+        });
+      }).catch(err => {
+        console.error('Không thể tải PDF:', err);
+        alert('Lỗi tải PDF. Kiểm tra lại file PDF hoặc đường dẫn.');
+      });
     });
   </script>
 </body>
