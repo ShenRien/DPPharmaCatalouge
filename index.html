@@ -81,7 +81,7 @@
     const pdfPath = 'IMG_8670_compressed.pdf'; // Đổi tên file PDF tại đây
 
     const flipbook = document.getElementById('flipbook');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://github.com/ShenRien/DPPharmaCatalouge/blob/ad54dc29f13f1a98ff352e886faa4f379123fdcb/pdf.min.js';
 
     pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
       const totalPages = pdf.numPages;
