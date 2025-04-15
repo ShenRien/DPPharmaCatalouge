@@ -119,22 +119,19 @@
         pageElements.forEach(el => flipbook.appendChild(el));
 
         $('#flipbook').turn({
-			  width: pageElements[0].offsetWidth,
-			  height: pageElements[0].offsetHeight,
-			  autoCenter: true,
-			  display: 'single',
-			  duration: 1200 // 👉 thời gian lật (ms), có thể chỉnh thành 1500 nếu muốn chậm hơn
-				});
-				// Cải thiện lật trang trên thiết bị cảm ứng:
-			  when: {
-				turning: function(event, page, view) {
-				  // Tùy chỉnh, nếu cần thêm logic xử lý trong quá trình lật
-				}
-			  },
-			  // Bật tính năng cảm ứng
-			  touch: true,
-			  // Enable swipe (vuốt) để lật trang
-			  swipe: true
+          width: pageElements[0].offsetWidth,
+          height: pageElements[0].offsetHeight,
+          autoCenter: true,
+          display: 'single',
+          duration: 1200, // 👉 thời gian lật (ms), có thể chỉnh thành 1500 nếu muốn chậm hơn
+          when: {
+            turning: function(event, page, view) {
+              // Thêm logic xử lý trong quá trình lật
+            }
+          },
+          touch: true,
+          swipe: true
+        });
       });
     }).catch(err => {
       console.error('Không thể tải PDF:', err);
