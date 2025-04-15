@@ -161,7 +161,7 @@
 
         const loadPDF = async () => {
             try {
-                pdfDoc = await pdfjsLib.getDocument('img_8670_compressed.pdf').promise;
+                pdfDoc = await pdfjsLib.getDocument('IMG_8670_compressed.pdf').promise;
                 document.getElementById('total-pages').textContent = pdfDoc.numPages;
                 await renderPDF();
                 
