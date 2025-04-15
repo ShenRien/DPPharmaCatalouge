@@ -2,68 +2,143 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Flipbook ảnh</title>
+  <title>Flipbook PDF - 1 Trang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       background: #eee;
-      font-family: Arial;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 20px;
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
     }
+
     #flipbook {
-      width: 600px;
-      height: 400px;
+      margin: 0 auto;
+      max-height: 90vh;
+      max-width: 100%;
+      overflow: hidden;
     }
-    #flipbook .page {
-      width: 100%;
-      height: 100%;
+
+    .page {
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-    #flipbook img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+
+    canvas {
+      height: 90vh !important;
+      width: auto !important;
     }
+
     .nav {
-      margin-top: 20px;
+      position: fixed;
+      bottom: 5%;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      z-index: 1000;
     }
+
     .nav button {
       padding: 10px 20px;
       font-size: 16px;
-      margin: 0 10px;
+      cursor: pointer;
+      border: none;
+      background-color: #333;
+      color: white;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .nav button:hover {
+      background-color: #555;
     }
   </style>
 </head>
 <body>
 
-<h2>Flipbook ảnh đơn giản</h2>
+  <h2 style="text-align:center; margin: 20px 0;">Flipbook PDF (1 trang)</h2>
+  <div id="flipbook"></div>
 
-<div id="flipbook">
-  <div class="page"><img src="https://via.placeholder.com/600x400?text=Trang+1" /></div>
-  <div class="page"><img src="https://via.placeholder.com/600x400?text=Trang+2" /></div>
-  <div class="page"><img src="https://via.placeholder.com/600x400?text=Trang+3" /></div>
-</div>
+  <div class="nav">
+    <button onclick="$('#flipbook').turn('previous')">⬅ Trang trước</button>
+    <button onclick="$('#flipbook').turn('next')">Trang sau ➡</button>
+  </div>
 
-<div class="nav">
-  <button onclick="$('#flipbook').turn('previous')">⬅ Trang trước</button>
-  <button onclick="$('#flipbook').turn('next')">Trang sau ➡</button>
-</div>
+  <!-- Script nội bộ -->
+  <script src="https://github.com/ShenRien/DPPharmaCatalouge/blob/js/jquery-3.6.0.min.js"></script>
+  <script src="https://github.com/ShenRien/DPPharmaCatalouge/blob/js/turn.min.js"></script>
+  <script src="https://github.com/ShenRien/DPPharmaCatalouge/blob/js/pdf.min.js"></script>
 
-<!-- Nạp đúng thư viện -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+  <script>
+    const pdfPath = 'IMG_8670_compressed.pdf'; // Đổi tên file PDF tại đây
+    const flipbook = document.getElementById('flipbook');
 
-<script>
-  $(document).ready(function () {
-    $('#flipbook').turn({
-      width: 600,
-      height: 400,
-      autoCenter: true,
-      display: 'single'
+    // Cấu hình worker chuẩn
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://github.com/ShenRien/DPPharmaCatalouge/blob/js/pdf.worker.min.js";
+
+    pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
+      const totalPages = pdf.numPages;
+      const pageElements = [];
+
+      const loadPage = (pageNum) => {
+        return pdf.getPage(pageNum).then(page => {
+          const viewport = page.getViewport({ scale: 1 });
+          const scale = (window.innerHeight * 0.9) / viewport.height;
+          const scaledViewport = page.getViewport({ scale });
+
+          const canvas = document.createElement('canvas');
+          canvas.className = 'page';
+          canvas.width = scaledViewport.width;
+          canvas.height = scaledViewport.height;
+
+          return page.render({
+            canvasContext: canvas.getContext('2d'),
+            viewport: scaledViewport
+          }).promise.then(() => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'page';
+            wrapper.appendChild(canvas);
+            pageElements[pageNum - 1] = wrapper;
+          });
+        });
+      };
+
+      const pagePromises = [];
+      for (let i = 1; i <= totalPages; i++) {
+        pagePromises.push(loadPage(i));
+      }
+
+      Promise.all(pagePromises).then(() => {
+        pageElements.forEach(el => flipbook.appendChild(el));
+
+        $('#flipbook').turn({
+          width: pageElements[0].offsetWidth,
+          height: pageElements[0].offsetHeight,
+          autoCenter: true,
+          display: 'single',
+          duration: 1200,
+          when: {
+            turning: function(event, page, view) {
+              // Thêm logic xử lý trong quá trình lật
+            }
+          },
+          touch: true,
+          swipe: true
+        });
+      });
+    }).catch(err => {
+      console.error('Không thể tải PDF:', err);
+      alert('Lỗi tải PDF. Kiểm tra lại file PDF hoặc đường dẫn.');
     });
-  });
-</script>
+  </script>
 
 </body>
 </html>
