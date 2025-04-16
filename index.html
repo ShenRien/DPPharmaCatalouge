@@ -193,7 +193,7 @@ h4.info {
 <body>
     <div class="header">
         <h1 class="title">DP Pharma Catalogue</h1>
-        <h4 class="info"> Sđt/Zalo:  0946 929 420  (Thanh Liêm) </h4>
+       // <h4 class="info"> Sđt/Zalo:  0946 929 420  (Thanh Liêm) </h4>//
     </div>
 
     <div id="main-container">
@@ -230,7 +230,7 @@ h4.info {
 
         const initPDF = async () => {
             try {
-                pdfDoc = await pdfjsLib.getDocument('DPCATALOUGE.pdf').promise;
+                pdfDoc = await pdfjsLib.getDocument('CATALOUGE.pdf').promise;
                 document.getElementById('total-pages').textContent = pdfDoc.numPages;
                 await renderPage(currentPage);
                 setupEventListeners();
