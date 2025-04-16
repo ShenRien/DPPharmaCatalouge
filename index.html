@@ -158,7 +158,7 @@
         // Khởi tạo PDF
         const initPDF = async () => {
             try {
-                pdfDoc = await pdfjsLib.getDocument('IMG_8670_compressed.pdf').promise;
+                pdfDoc = await pdfjsLib.getDocument('DPCATALOUGE.pdf').promise;
                 document.getElementById('total-pages').textContent = pdfDoc.numPages;
                 renderPage(currentPage);
                 setupEventListeners();
